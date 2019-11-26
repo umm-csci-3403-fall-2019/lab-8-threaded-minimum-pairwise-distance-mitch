@@ -21,16 +21,16 @@ public class ThreadedMinimumPairwiseDistance implements MinimumPairwiseDistance 
         // Create and start a bunch of threads
         Thread[] threads = new Thread[numThreads];
         // Create and start thread i
-        threads[0] = new Thread(new threadRunnable(values, 0,0,1,1,false, minArrayList));
+        threads[0] = new Thread(new threadRunnable(values, 1, minArrayList));
         threads[0].start();
 
-        threads[1] = new Thread(new threadRunnable(values, (1/2), 0, 1,1,false, minArrayList));
+        threads[1] = new Thread(new threadRunnable(values, 2, minArrayList));
         threads[1].start();
 
-        threads[2] = new Thread(new threadRunnable(values, (1/2), (1/2), 1,1,false, minArrayList));
+        threads[2] = new Thread(new threadRunnable(values, 3, minArrayList));
         threads[2].start();
 
-        threads[3] = new Thread(new threadRunnable(values, (1/2), 0, 1,1,true, minArrayList));
+        threads[3] = new Thread(new threadRunnable(values, 4, minArrayList));
         threads[3].start();
 
 
@@ -70,21 +70,14 @@ public class ThreadedMinimumPairwiseDistance implements MinimumPairwiseDistance 
         private int[] inputArray;
 
         private minimumTracker mins;
-        private int m1;
-        private int m2;
-        private int m3;
-        private int m4;
-        private boolean m5;
+        private int threadnum;
 
-        public threadRunnable(int[] inputArray,int m1, int m2, int m3, int m4, boolean m5, minimumTracker mins){
+        public threadRunnable(int[] inputArray, int threadnum, minimumTracker mins){
 
             this.inputArray = inputArray;
             this.mins = mins;
-            this.m1 =m1;
-            this.m2 =m2;
-            this.m3 =m3;
-            this.m4  =m4;
-            this.m5 =m5;
+            this.threadnum =threadnum;
+
         }
 
         @Override
@@ -93,10 +86,9 @@ public class ThreadedMinimumPairwiseDistance implements MinimumPairwiseDistance 
             long result = Integer.MAX_VALUE;
 
 
-            if (!m5){
-                for (int i = (m1 * N); i < (N / m3); ++i) {
-                    for (int j = (m2 * N); (j + (m4 * (N/2))) < i; ++j) {
-                        // Gives us all the pairs (i, j) where 0 <= j < i < values.length
+            if (threadnum==1){
+                for (int i = 0; i < (N / 2); ++i) {
+                    for (int j = 0; j < i; ++j) {
                         long diff = Math.abs(this.inputArray[i] - this.inputArray[j]);
                         if (diff < result) {
                             result = diff;
@@ -105,11 +97,9 @@ public class ThreadedMinimumPairwiseDistance implements MinimumPairwiseDistance 
                 }
             }
 
-
-            else {
-                for (int j = (m1 * N); (j +(m4*(N/2))) < (N / m3); ++j) {
-                    for (int i = (m2 * N); i < j; ++i) {
-                        // Gives us all the pairs (i, j) where 0 <= j < i < values.length
+            if (threadnum==2){
+                for (int i = (N / 2); i < N; ++i) {
+                    for (int j = 0; (j + (N / 2))< i; ++j) {
                         long diff = Math.abs(this.inputArray[i] - this.inputArray[j]);
                         if (diff < result) {
                             result = diff;
@@ -118,6 +108,27 @@ public class ThreadedMinimumPairwiseDistance implements MinimumPairwiseDistance 
                 }
             }
 
+            if (threadnum==3){
+                for (int i = (N / 2); i < N; ++i) {
+                    for (int j = (N / 2); j < i; ++j) {
+                        long diff = Math.abs(this.inputArray[i] - this.inputArray[j]);
+                        if (diff < result) {
+                            result = diff;
+                        }
+                    }
+                }
+            }
+
+            if (threadnum==4){
+                for (int j = 0; j < (N / 2); ++j) {
+                    for (int i = (N / 2); i < (j + (N / 2)); ++i) {
+                        long diff = Math.abs(this.inputArray[i] - this.inputArray[j]);
+                        if (diff < result) {
+                            result = diff;
+                        }
+                    }
+                }
+            }
 
             this.mins.addMinimum(result);
         }
